@@ -15,19 +15,28 @@ const Plan = () => {
   const [procedures, setProcedures] = useState([]);
   const [planProcedures, setPlanProcedures] = useState([]);
   const [users, setUsers] = useState([]);
+  const [selectedUsersMap, setSelectedUsersMap] = useState({});
 
   useEffect(() => {
     (async () => {
-      var procedures = await getProcedures();
-      var planProcedures = await getPlanProcedures(id);
-      var users = await getUsers();
+      const procedures = await getProcedures();
+      const planProcedures = await getPlanProcedures(id);
+      const users = await getUsers();
 
-      var userOptions = [];
-      users.map((u) => userOptions.push({ label: u.name, value: u.userId }));
+      const userOptions = users.map((u) => ({ label: u.name, value: u.userId }));
 
       setUsers(userOptions);
       setProcedures(procedures);
       setPlanProcedures(planProcedures);
+
+      // Load selected users for each procedure from sessionStorage
+      let storedUsersMap = {};
+      planProcedures.forEach(p => {
+        const storedUsers = sessionStorage.getItem(`selectedUsers-${p.procedure.procedureId}`);
+        storedUsersMap[p.procedure.procedureId] = storedUsers ? JSON.parse(storedUsers) : [];
+      });
+
+      setSelectedUsersMap(storedUsersMap);
     })();
   }, [id]);
 
@@ -36,19 +45,24 @@ const Plan = () => {
     if (hasProcedureInPlan) return;
 
     await addProcedureToPlan(id, procedure.procedureId);
-    setPlanProcedures((prevState) => {
-      return [
-        ...prevState,
-        {
-          planId: id,
+    setPlanProcedures((prevState) => [
+      ...prevState,
+      {
+        planId: id,
+        procedureId: procedure.procedureId,
+        procedure: {
           procedureId: procedure.procedureId,
-          procedure: {
-            procedureId: procedure.procedureId,
-            procedureTitle: procedure.procedureTitle,
-          },
+          procedureTitle: procedure.procedureTitle,
         },
-      ];
-    });
+      },
+    ]);
+  };
+
+  const updateSelectedUsers = (procedureId, selectedUsers) => {
+    setSelectedUsersMap(prevState => ({
+      ...prevState,
+      [procedureId]: selectedUsers
+    }));
   };
 
   return (
@@ -70,6 +84,7 @@ const Plan = () => {
                         <ProcedureItem
                           key={p.procedureId}
                           procedure={p}
+                          users={users}
                           handleAddProcedureToPlan={handleAddProcedureToPlan}
                           planProcedures={planProcedures}
                         />
@@ -84,6 +99,8 @@ const Plan = () => {
                           key={p.procedure.procedureId}
                           procedure={p.procedure}
                           users={users}
+                          selectedUsersMap={selectedUsersMap}
+                          updateSelectedUsers={updateSelectedUsers}
                         />
                       ))}
                     </div>

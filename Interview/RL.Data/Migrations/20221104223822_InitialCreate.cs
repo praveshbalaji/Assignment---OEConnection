@@ -9,6 +9,44 @@ namespace RL.Data.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+
+
+            migrationBuilder.CreateTable(
+    name: "PlanProcedureUsers",
+    columns: table => new
+    {
+        ProcedureId = table.Column<int>(type: "INTEGER", nullable: false),
+        PlanId = table.Column<int>(type: "INTEGER", nullable: false),
+        UserId = table.Column<int>(type: "INTEGER", nullable: false),
+        CreateDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+        UpdateDate = table.Column<DateTime>(type: "TEXT", nullable: false)
+    },
+    constraints: table =>
+    {
+        table.PrimaryKey("PK_PlanProcedureUsers", x => new { x.PlanId, x.ProcedureId, x.UserId });
+        table.ForeignKey(
+            name: "FK_PlanProcedureUsers_PlanProcedures",
+            columns: x => new { x.PlanId, x.ProcedureId },
+            principalTable: "PlanProcedures",
+            principalColumns: new[] { "PlanId", "ProcedureId" },
+            onDelete: ReferentialAction.Cascade);
+        table.ForeignKey(
+            name: "FK_PlanProcedureUsers_Users_UserId",
+            column: x => x.UserId,
+            principalTable: "Users",
+            principalColumn: "UserId",
+            onDelete: ReferentialAction.Cascade);
+    });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlanProcedureUsers_UserId",
+                table: "PlanProcedureUsers",
+                column: "UserId");
+
+
+
+
+
             migrationBuilder.CreateTable(
                 name: "Plans",
                 columns: table => new
