@@ -17,37 +17,17 @@ const PlanProcedureItem = ({ procedure, users, selectedUsersMap, updateSelectedU
         setSelectedUsers(updatedUsers);
 
         // Store selected users in sessionStorage
-    sessionStorage.setItem(`selectedUsers-${users.usersId}`, JSON.stringify(availableUsers.length));
+        sessionStorage.setItem(`selectedUsers-${procedure.procedureId}`, JSON.stringify(updatedUsers));
 
         // Update the global selectedUsersMap
         updateSelectedUsers(procedure.procedureId, updatedUsers);
     };
 
-    // Dynamically calculate max engineers allowed based on total selected users
-    const totalAssignedUsers = Object.values(selectedUsersMap).flat().length;
-    const maxEngineersAllowed = users.length > 0 ? users.length : 4; // Default to 4 if users list is empty
-
-    // Filter users: Exclude users already assigned to other procedures
-    const assignedUserIds = Object.values(selectedUsersMap).flat().map(user => user.value);
-    const availableUsers = users.filter(user => !assignedUserIds.includes(user.value) || selectedUsers.some(u => u.value === user.value));
-
-
-   
-
-    if (availableUsers.length === 0) {
-       
-        return null;
-    }
-
-    // Disable checkbox if all engineers are assigned
-    const isDisabled = totalAssignedUsers >= maxEngineersAllowed;
-
-    const handleCheckboxClick = (e) => {
-        if (isDisabled) {
-            e.preventDefault();
-            alert("OEConnection: All engineers are assigned to other procedures.");
-        }
-    };
+    // Allow selection of all users in every dropdown
+    const availableUsers = users.map(user => ({
+        value: user.value,
+        label: user.label
+    }));
 
     return (
         <div className="py-2">
